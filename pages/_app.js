@@ -9,9 +9,15 @@ export default function MyApp({ Component, pageProps }) {
       locale={viVN}
       theme={{
         token: {
-          colorPrimary: '#1677ff',
-          borderRadius: 6,
-          fontFamily: "'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif",
+          colorPrimary: '#0043a5',
+          borderRadius: 5,
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif",
+          fontSize: 14,
+          colorBgBase: '#fefefe',
+        },
+        components: {
+          Button: { borderRadius: 5 },
+          Table: { borderRadius: 0 },
         },
       }}
     >

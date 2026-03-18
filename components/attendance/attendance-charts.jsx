@@ -7,10 +7,13 @@ import { TYPES, DEPTS } from "../../data/attendance-data";
 
 // Dynamic import prevents SSR errors with canvas-based chart library
 const Pie = dynamic(() => import("@ant-design/charts").then((m) => m.Pie), { ssr: false });
-const Bar = dynamic(() => import("@ant-design/charts").then((m) => m.Bar), { ssr: false });
+const Column = dynamic(() => import("@ant-design/charts").then((m) => m.Column), { ssr: false });
 
 // Chart color palette aligned with violation type semantics
 const TYPE_COLORS = ["#fa8c16", "#13c2c2", "#ff4d4f", "#ff7a45", "#722ed1"];
+
+// Orange/coral color matching the reference chart image
+const COLUMN_COLOR = "#E8552B";
 
 export default function AttendanceCharts({ records }) {
   // Aggregate by violation type
@@ -20,14 +23,29 @@ export default function AttendanceCharts({ records }) {
     color: TYPE_COLORS[i],
   })).filter((d) => d.value > 0);
 
-  // Aggregate by department (top 6 only for readability)
+  // Abbreviated dept name map for x-axis labels (matches khaothi chart style)
+  const DEPT_ABBR = {
+    "Phòng Truyền thông và Tuyển sinh": "TTTS",
+    "Phòng Quản lý Đào tạo": "QLDT",
+    "Phòng Quản trị Thiết bị": "QTTB",
+    "Khoa Kỹ thuật môi trường": "MOITRUONG",
+    "Văn phòng trường": "VPD",
+    "Phòng Công tác chính trị và Quản lý sinh viên": "CTSV",
+    "Phòng Khoa học và Công nghệ": "KHCN",
+    "Trung tâm CNTT & CSDL": "TTCNTT",
+    "Phòng Kế hoạch - Tài chính": "KHTC",
+    "Khoa Cầu đường": "CAUDUONG",
+  };
+
+  // Aggregate by department (top 10, sorted descending) with abbreviated labels
   const deptData = DEPTS.map((dept) => ({
-    dept: dept.replace("Phòng ", "").replace("Khoa ", ""),
+    dept: DEPT_ABBR[dept] || dept.replace("Phòng ", "").replace("Khoa ", "").replace("Trung tâm ", "").replace("Văn phòng ", ""),
+    fullDept: dept,
     count: records.filter((r) => r.dept === dept).length,
   }))
     .filter((d) => d.count > 0)
     .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
+    .slice(0, 10);
 
   const pieConfig = {
     data: typeData,
@@ -42,24 +60,45 @@ export default function AttendanceCharts({ records }) {
       title: { content: "Tổng", style: { fontSize: 14 } },
       content: { content: String(records.length), style: { fontSize: 24, fontWeight: 700 } },
     },
-    tooltip: { formatter: (d) => ({ name: d.type, value: `${d.value} lỗi` }) },
-    interactions: [{ type: "element-active" }],
+    tooltip: {
+      title: "type",
+      items: [{ field: "value", name: "Số lỗi" }],
+    },
     height: 240,
   };
 
-  const barConfig = {
+  // Vertical column chart config — matches orange column style in reference image
+  // Uses @ant-design/charts v2.x (G2 v5) API: text instead of formatter
+  const columnConfig = {
     data: deptData,
-    xField: "count",
-    yField: "dept",
-    seriesField: "dept",
-    color: "#1677ff",
-    barBackground: { style: { fill: "rgba(0,0,0,0.04)" } },
-    label: { position: "right", style: { fontSize: 12 } },
+    xField: "dept",
+    yField: "count",
+    style: { fill: COLUMN_COLOR, radius: 2 },
+    // G2 v5 label API: use `text` field (not formatter)
+    label: {
+      text: "count",
+      position: "top",
+      style: { fontSize: 12, fontWeight: 600, fill: "#333" },
+    },
     legend: false,
-    xAxis: { grid: { line: { style: { stroke: "#f0f0f0" } } } },
-    tooltip: { formatter: (d) => ({ name: d.dept, value: `${d.count} lỗi` }) },
-    interactions: [{ type: "element-active" }],
-    height: 240,
+    axis: {
+      y: {
+        gridStroke: "#e8ecf0",
+        labelFontSize: 12,
+        labelFill: "#666",
+      },
+      x: {
+        labelFontSize: 11,
+        labelFill: "#555",
+        tickStroke: "transparent",
+      },
+    },
+    // G2 v5 tooltip API
+    tooltip: {
+      title: "fullDept",
+      items: [{ field: "count", name: "Số lỗi" }],
+    },
+    height: 260,
   };
 
   return (
@@ -78,7 +117,7 @@ export default function AttendanceCharts({ records }) {
       <Col xs={24} md={14}>
         <ProCard title="Lỗi theo phòng ban" style={{ borderRadius: 8 }}>
           {deptData.length > 0 ? (
-            <Bar {...barConfig} />
+            <Column {...columnConfig} />
           ) : (
             <div style={{ textAlign: "center", padding: 40, color: "#bfbfbf" }}>
               Chưa có dữ liệu

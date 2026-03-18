@@ -56,7 +56,7 @@ export default function AttendanceFormModal({ open, record, onFinish, onCancel }
       onCancel={onCancel}
       footer={null}
       width={560}
-      destroyOnClose
+      destroyOnHidden
     >
       <ProForm
         form={form}

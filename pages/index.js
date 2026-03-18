@@ -3,11 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { Button, Tag, Space, Avatar, Popconfirm, message, Typography, Tooltip } from "antd";
+import { Button, Tag, Space, Avatar, Popconfirm, message, Tooltip } from "antd";
 import { ProTable, ProCard } from "@ant-design/pro-components";
 import {
-  PlusOutlined,
-  DownloadOutlined,
   EditOutlined,
   DeleteOutlined,
   BarChartOutlined,
@@ -20,6 +18,8 @@ import {
 } from "../data/attendance-data";
 import StatsCards from "../components/attendance/stats-cards";
 import AttendanceFormModal from "../components/attendance/attendance-form-modal";
+import AppSidebar from "../components/layout/app-sidebar";
+import AppHeader from "../components/layout/app-header";
 
 // Load charts only on client to avoid SSR canvas errors
 const AttendanceCharts = dynamic(
@@ -142,16 +142,29 @@ export default function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
   const [activeTab, setActiveTab] = useState("table");
+  const [isMounted, setIsMounted] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Load from localStorage on mount
+  const sidebarWidth = sidebarCollapsed ? 60 : 250;
+
+  // Load from localStorage; reset to SAMPLE_DATA when data version changes
+  const DATA_VERSION = "v2";
   useEffect(() => {
     try {
+      const version = localStorage.getItem("cham_cong_version");
       const saved = localStorage.getItem("cham_cong_data");
-      setRecords(saved ? JSON.parse(saved) : SAMPLE_DATA);
+      if (saved && version === DATA_VERSION) {
+        setRecords(JSON.parse(saved));
+      } else {
+        setRecords(SAMPLE_DATA);
+        localStorage.setItem("cham_cong_version", DATA_VERSION);
+        localStorage.setItem("cham_cong_data", JSON.stringify(SAMPLE_DATA));
+      }
     } catch {
       setRecords(SAMPLE_DATA);
     }
+    setIsMounted(true);
   }, []);
 
   function persist(data) {
@@ -211,8 +224,35 @@ export default function HomePage() {
   );
 
   const tabItems = [
-    { key: "table", label: <span><TableOutlined style={{ marginRight: 6 }} />Danh sách</span> },
-    { key: "charts", label: <span><BarChartOutlined style={{ marginRight: 6 }} />Thống kê</span> },
+    {
+      key: "table",
+      label: <span><TableOutlined style={{ marginRight: 6 }} />Danh sách</span>,
+      children: (
+        <ProTable
+          rowKey={(r) => `${r.id}-${r.date}`}
+          dataSource={records}
+          columns={columns}
+          search={{ labelWidth: "auto", defaultCollapsed: false }}
+          pagination={{
+            pageSize: 8,
+            showSizeChanger: false,
+            showTotal: (total) => `Tổng ${total} bản ghi`,
+          }}
+          scroll={{ x: 900 }}
+          toolBarRender={false}
+          style={{ borderRadius: 0 }}
+        />
+      ),
+    },
+    {
+      key: "charts",
+      label: <span><BarChartOutlined style={{ marginRight: 6 }} />Thống kê</span>,
+      children: (
+        <div style={{ padding: 16 }}>
+          <AttendanceCharts records={records} />
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -224,111 +264,50 @@ export default function HomePage() {
 
       {contextHolder}
 
-      <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
-        {/* Top header bar */}
+      {/* Sidebar + content layout matching khaothi app structure */}
+      <div style={{ display: "flex", minHeight: "100vh", background: "#fefefe" }}>
+        {isMounted && (
+          <AppSidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed((v) => !v)}
+          />
+        )}
+
+        {/* Main area shifts right based on sidebar width */}
         <div
           style={{
-            background: "linear-gradient(135deg, #1E3A5F 0%, #2E75B6 100%)",
-            padding: "0 24px",
-            height: 60,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            marginLeft: isMounted ? sidebarWidth : 0,
+            flex: 1,
+            minWidth: 0,
+            transition: "margin-left 0.2s ease",
           }}
         >
-          <Space>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.15)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Calendar SVG icon — no emoji */}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, lineHeight: 1.2 }}>
-                Quản lý Chấm Công Lỗi
-              </div>
-              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>
-                Trường Đại học Xây dựng Hà Nội
-              </div>
-            </div>
-          </Space>
-          <Space>
-            <Button
-              icon={<PlusOutlined />}
-              onClick={openAdd}
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                color: "#fff",
-              }}
-            >
-              Thêm lỗi
-            </Button>
-            <Button
-              icon={<DownloadOutlined />}
-              onClick={exportCSV}
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                color: "#fff",
-              }}
-            >
-              Xuất CSV
-            </Button>
-          </Space>
-        </div>
+          {/* Fixed top header */}
+          {isMounted && (
+            <AppHeader
+              onAdd={openAdd}
+              onExport={exportCSV}
+              sidebarWidth={sidebarWidth}
+            />
+          )}
 
-        {/* Main content area */}
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 16px" }}>
-          {/* KPI summary row */}
-          <StatsCards records={records} />
+          {/* Scrollable content below header */}
+          <div style={{ padding: "16px", paddingTop: isMounted ? 66 : 16 }}>
+            {isMounted && <StatsCards records={records} />}
 
-          {/* Table / Charts tab card */}
-          <ProCard
-            style={{ borderRadius: 8 }}
-            bodyStyle={{ padding: 0 }}
-            tabs={{
-              activeKey: activeTab,
-              onChange: setActiveTab,
-              items: tabItems,
-              tabBarStyle: { paddingLeft: 16, paddingRight: 16, marginBottom: 0 },
-            }}
-          >
-            {activeTab === "table" && (
-              <ProTable
-                rowKey={(r) => `${r.id}-${r.date}`}
-                dataSource={records}
-                columns={columns}
-                search={{ labelWidth: "auto", defaultCollapsed: false }}
-                pagination={{
-                  pageSize: 8,
-                  showSizeChanger: false,
-                  showTotal: (total) => `Tổng ${total} bản ghi`,
+            {isMounted && (
+              <ProCard
+                style={{ borderRadius: 5, marginTop: 0 }}
+                bodyStyle={{ padding: 0 }}
+                tabs={{
+                  activeKey: activeTab,
+                  onChange: setActiveTab,
+                  items: tabItems,
+                  tabBarStyle: { paddingLeft: 16, paddingRight: 16, marginBottom: 0 },
                 }}
-                scroll={{ x: 900 }}
-                toolBarRender={false}
-                style={{ borderRadius: 0 }}
               />
             )}
-            {activeTab === "charts" && (
-              <div style={{ padding: 16 }}>
-                <AttendanceCharts records={records} />
-              </div>
-            )}
-          </ProCard>
+          </div>
         </div>
       </div>
 

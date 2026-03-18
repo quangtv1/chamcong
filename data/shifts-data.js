@@ -1,0 +1,13 @@
+// Work shift data from data.xlsx sheet: 4.ca_lam_viec
+export const SHIFTS = [
+  { ma: "HC01", ten: "HANH_CHINH_01", donVi: "Toàn trường",           batDau: "07:30", chamVaoTu: "07:00", chamVaoDen: "07:45", ketThuc: "11:30", chamRaTu: "11:15", chamRaDen: "12:00", soGio: 4,   soNgay: 0.5, hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "HC02", ten: "HANH_CHINH_02", donVi: "Toàn trường",           batDau: "13:30", chamVaoTu: "13:00", chamVaoDen: "13:45", ketThuc: "17:30", chamRaTu: "17:15", chamRaDen: "18:00", soGio: 4,   soNgay: 0.5, hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "GD01", ten: "GIANG_DUONG_01", donVi: "Phòng Quản trị Thiết bị", batDau: "06:00", chamVaoTu: "05:30", chamVaoDen: "06:15", ketThuc: "14:00", chamRaTu: "13:45", chamRaDen: "14:30", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "GD02", ten: "GIANG_DUONG_02", donVi: "Phòng Quản trị Thiết bị", batDau: "13:00", chamVaoTu: "12:30", chamVaoDen: "13:15", ketThuc: "21:00", chamRaTu: "20:45", chamRaDen: "21:30", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "GD03", ten: "GIANG_DUONG_03", donVi: "Phòng Quản trị Thiết bị", batDau: "14:00", chamVaoTu: "13:30", chamVaoDen: "14:15", ketThuc: "19:00", chamRaTu: "18:45", chamRaDen: "19:30", soGio: 5,   soNgay: 0.625, hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "BV01", ten: "BAO_VE_01",     donVi: "Phòng Bảo vệ",          batDau: "06:00", chamVaoTu: "05:30", chamVaoDen: "06:15", ketThuc: "14:00", chamRaTu: "13:45", chamRaDen: "14:30", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "BV02", ten: "BAO_VE_02",     donVi: "Phòng Bảo vệ",          batDau: "14:00", chamVaoTu: "13:30", chamVaoDen: "14:15", ketThuc: "22:00", chamRaTu: "21:45", chamRaDen: "22:30", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "BV03", ten: "BAO_VE_03",     donVi: "Phòng Bảo vệ",          batDau: "22:00", chamVaoTu: "21:30", chamVaoDen: "22:15", ketThuc: "06:00", chamRaTu: "05:45", chamRaDen: "06:30", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "GH01", ten: "GIO_HOC_01",    donVi: "Trung tâm CNTT & CSDL", batDau: "06:45", chamVaoTu: "06:15", chamVaoDen: "07:00", ketThuc: "14:45", chamRaTu: "14:30", chamRaDen: "15:15", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+  { ma: "GH02", ten: "GIO_HOC_02",    donVi: "Trung tâm CNTT & CSDL", batDau: "12:15", chamVaoTu: "11:45", chamVaoDen: "12:30", ketThuc: "20:15", chamRaTu: "20:00", chamRaDen: "20:45", soGio: 8,   soNgay: 1,   hsNgayThuong: 1, hsNgayNghi: 2, hsNgayLe: 3 },
+];
